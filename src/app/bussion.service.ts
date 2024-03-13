@@ -46,7 +46,7 @@ export class BussionService {
 
   Endpoints = {
     dataops: 'http://demo.bussion.com/api/V3/Arctitecture/',
-    token: '83174568146567311316',
+    token: '55544237821771315888',
   };
 
   refreshData(): Observable<generalResponse> {

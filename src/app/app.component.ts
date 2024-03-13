@@ -1,22 +1,12 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild, Inject, NgZone, PLATFORM_ID } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterOutlet } from '@angular/router';
 import { BussionService } from './bussion.service';
-import OrgChart from '@balkangraph/orgchart.js';
 import { concatMap } from 'rxjs/operators';
-import {
-  connectorResponse,
-  connectorTaskDestination,
-  connectorTaskResponse,
-  connectorTaskSource,
-  dataStoreResponse,
-  dataflowResponse,
-  nodeResponse,
-  serverResponse,
-  columns, script,
-  dataflowParameters,
-  dataStoreCollection
-} from './entities/customEntities';
+import { connectorResponse, connectorTaskDestination, connectorTaskResponse, connectorTaskSource, dataStoreResponse, dataflowResponse, nodeResponse, serverResponse, dataStoreCollection } from './entities/customEntities';
+import * as am5 from '@amcharts/amcharts5';
+import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
+import * as am5hierarchy from '@amcharts/amcharts5/hierarchy';
 
 @Component({
   selector: 'app-root',
@@ -28,185 +18,7 @@ import {
 })
 export class AppComponent {
 
-  /*
-
-    Try() {
-      this.bS.refreshData().subscribe(() => this.GetBussionServers());
-    }
-
-    GetBussionServers() {
-      this.bS.GetBussionServers().pipe(
-        tap((response) => {
-          this.bussionServers = [{ name: response.message[0] as string }];
-        }),
-        tap(() => {
-          this.GetBussionConnectors().subscribe(res => {
-            if (res.result === true) {
-              this.bussionConnectors = res.message as connectorResponse[];
-            }
-          });
-        }),
-        tap(() => {
-          this.GetBussionDataNodes().subscribe(res => {
-            if (res.result === true) {
-              this.bussionDataNodes = res.message as nodeResponse[];
-            }
-          })
-        }),
-        tap(() => {
-          this.GetConnectorTasks().pipe(map((res) => {
-            if (res.result === true) {
-              this.connectorTasks = res.message as connectorTaskResponse[];
-            }
-          })
-          ).subscribe(() => {
-            this.connectorTasks.map(task => {
-              const source: any = {
-                pid: task.connectorId,
-                sourceType: task.sourceType,
-                sourceDatabase: task.sourceDatabase,
-                sourceServer: task.sourceServer,
-                sourceUser: task.sourceUser,
-                sourcePassword: task.sourcePassword,
-                sourcePort: task.sourcePort
-              }
-              this.connectorTaskSources.push(source);
-            })
-          });
-        }),
-        tap(() => {
-          this.GetDataStores().subscribe(res => {
-            if (res.result === true) {
-              this.dataStores = res.message as dataStoreResponse[];
-            }
-          });
-        }),
-        tap(() => {
-          this.GetDataFlows().subscribe(res => {
-            if (res.result === true) {
-              this.dataFlows = res.message as dataflowResponse[];
-            }
-          });
-        }),
-      ).subscribe(() => {
-        this.edit();
-      })
-    }
-  */
-
-  /*GetBussionServers() {
-    this.bS.GetBussionServers().pipe(
-      concatMap((response) => {
-        if (response.result === true) {
-          this.bussionServers = [{ name: response.message[0] as string }];
-        }
-        return this.bS.GetBussionConnectors();
-      }),
-      concatMap((response) => {
-        if (response.result === true) {
-          this.bussionServers = [{ name: response.message[0] as string }];
-        }
-        return this.bS.GetBussionConnectors();
-      }),
-      concatMap((response) => {
-        if (response.result === true) {
-          this.bussionServers = [{ name: response.message[0] as string }];
-        }
-        return this.bS.GetBussionConnectors();
-      }),
-      concatMap((response) => {
-        if (response.result === true) {
-          this.bussionServers = [{ name: response.message[0] as string }];
-        }
-        return this.bS.GetBussionConnectors();
-      }),
-      concatMap((response) => {
-        if (response.result === true) {
-          this.bussionServers = [{ name: response.message[0] as string }];
-        }
-        return this.bS.GetBussionConnectors();
-      }),
-      concatMap((response) => {
-        if (response.result === true) {
-          this.bussionServers = [{ name: response.message[0] as string }];
-        }
-        return this.bS.GetBussionConnectors();
-      }),
-      concatMap(() => this.bS.GetBussionDataNodes()),
-      concatMap(() => this.bS.GetConnectorTasks()),
-      concatMap(() => this.bS.GetDataStores()),
-      concatMap(() => this.bS.GetDataFlows())
-    ).subscribe(() => {
-      this.edit();
-    });
-  }*/
-
-  /*
-  GetBussionDataNodes() {
-    this.bS.GetBussionDataNodes().subscribe((res) => {
-      if (res.result === true) {
-        this.bussionDataNodes = res.message as nodeResponse[];
-      }
-      return res;
-    });
-  }
-
-  GetConnectorTasks() {
-    this.bS.GetConnectorTasks().pipe(map((res) => {
-      if (res.result === true) {
-        this.connectorTasks = res.message as connectorTaskResponse[];
-      }
-      return res;
-    })
-    ).subscribe((res) => {
-      this.connectorTasks.map(task => {
-        const source: any = {
-          pid: task.connectorId,
-          sourceType: task.sourceType,
-          sourceDatabase: task.sourceDatabase,
-          sourceServer: task.sourceServer,
-          sourceUser: task.sourceUser,
-          sourcePassword: task.sourcePassword,
-          sourcePort: task.sourcePort
-        }
-        this.connectorTaskSources.push(source);
-      })
-      return res; // Bu satırı kullanıp kullanmamaya karar verebilirsiniz
-    });
-  }
-
-  GetDataStores() {
-    this.bS.GetDataStores().subscribe((res) => {
-      if (res.result === true) {
-        this.dataStores = res.message as dataStoreResponse[];
-      }
-      return res; // Bu satırı kullanıp kullanmamaya karar verebilirsiniz
-    });
-  }
-
-  GetBussionConnectors() {
-    this.bS.GetBussionConnectors().subscribe((res) => {
-      if (res.result === true) {
-        this.bussionConnectors = res.message as connectorResponse[];
-      }
-      return res; // Bu satırı kullanıp kullanmamaya karar verebilirsiniz
-    });
-  }
-
-  GetDataFlows() {
-    this.bS.GetDataFlows().subscribe((res) => {
-      if (res.result === true) {
-        this.dataFlows = res.message as dataflowResponse[];
-      }
-      return res; // Bu satırı kullanıp kullanmamaya karar verebilirsiniz
-    });
-  }
-  */
-
-  constructor(private bS: BussionService) { }
-
   @ViewChild('content') content!: ElementRef;
-
   allData: any[] = [];
   bussionServers: serverResponse[] = [];
   bussionConnectors: connectorResponse[] = [];
@@ -217,6 +29,9 @@ export class AppComponent {
   connectorTaskSources: connectorTaskSource[] = [];
   connectorTaskDestination: connectorTaskDestination[] = [];
   collections: dataStoreCollection[] = [];
+  private root!: am5.Root;
+
+  constructor(private bS: BussionService) { }
 
   GetBussionServers() {
 
@@ -271,7 +86,8 @@ export class AppComponent {
           sourceUser: task.sourceUser,
           sourcePassword: task.sourcePassword,
           sourcePort: task.sourcePort,
-          query: task.query
+          query: task.query,
+          img: 'assets/source.png'
         }
 
         const destination: any = {
@@ -279,6 +95,7 @@ export class AppComponent {
           node: task.node,
           universe: task.universe,
           collection: task.collection,
+          img: 'assets/destination.png'
         }
 
         this.connectorTaskSources.push(source);
@@ -286,11 +103,10 @@ export class AppComponent {
       });
 
       this.dataStores.map((store: dataStoreResponse) => {
-        console.log(store)
         let collection = {
           name: store.collection,
           pid: store.dataStoreId,
-          img: 'https://demo.bussion.com/assets/images/icons/data_store.svg',
+          img: 'https://static.vecteezy.com/system/resources/previews/014/705/802/non_2x/unique-server-icon-free-vector.jpg',
           columns: store.columns
         }
         this.collections.push(collection);
@@ -300,139 +116,177 @@ export class AppComponent {
     });
   }
 
+  editDatas() {
+
+    this.connectorTasks.map(task => {
+      const sources = this.connectorTaskSources.filter(source => source.pid === task.connectorId)
+        .map(item => ({
+          name: item.sourceDatabase,
+          image: item.img,
+        }));
+
+      const destinations = this.connectorTaskDestination.filter(destination => destination.pid === task.connectorId)
+        .map(item => ({
+          name: item.collection,
+          image: item.img,
+        }));
+
+      const children = [...sources, ...destinations];
+
+      task.children = children;
+    });
+
+    this.bussionConnectors.map(conn => {
+      const tasks = this.connectorTasks
+        .filter(cT => cT.bussionConnector == conn.nodeId)
+        .map(cT => ({ name: cT.name, image: 'assets/BussionConnector.png', children: cT.children }));
+
+      const flows = this.dataFlows
+        .filter(dF => dF.bussionConnectorId == conn.nodeId)
+        .map(dF => ({ name: dF.name, image: 'assets/dataFlow.png' }))
+
+      const children = [...tasks, ...flows];
+
+      conn.children = children;
+    });
+
+    this.bussionDataNodes.map(dN => {
+      let nodeId = dN.nodeId.toString();
+      dN.children = this.dataStores
+        .filter(dS => dS.nodeId == nodeId)
+        .map(dS => ({ name: dS.name, image: 'assets/dataStore.png' }));
+    })
+
+    let groupedNodes: { [key: string]: any[] } = {};
+
+    this.bussionDataNodes.forEach(node => {
+
+      const nodeType = node.dataNodeType;
+
+      if (!groupedNodes[nodeType]) {
+        groupedNodes[nodeType] = [];
+      }
+
+      groupedNodes[nodeType].push({
+        name: node.name,
+        children: node.children || [],
+
+        image: 'http://demo.bussion.com/assets/images/icons/node.jpeg',
+        collapsed: true
+      });
+    });
+
+    if (this.bussionServers && this.bussionServers.length > 0) {
+      this.bussionServers[0].children = [
+        ...this.bussionConnectors.map(conn => ({
+          name: conn.name,
+          children: conn.children || [],
+          image: 'http://demo.bussion.com/assets/images/icons/node7000.jpeg',
+          collapsed: true
+        })),
+        ...Object.keys(groupedNodes).map(key => ({
+          name: key,
+          children: groupedNodes[key],
+          image: 'http://demo.bussion.com/assets/images/icons/node.jpeg'
+        })),
+
+        /*...this.bussionDataNodes.map(dN => ({
+          name: dN.name,
+          children: dN.children || [],
+          value: 1,
+          image: 'https://static.vecteezy.com/system/resources/previews/014/705/802/non_2x/unique-server-icon-free-vector.jpg',
+          collapsed: true
+        })),*/
+
+        /*...this.dataFlows.map(dataFlow => ({
+          name: dataFlow.name,
+          image: 'https://demo.bussion.com/assets/images/icons/flow.svg',
+          value: 1,
+          children: []
+        }))*/
+      ];
+    } else {
+      console.error('this.bussionServers dizisi tanımsız veya boş.');
+    }
+
+    this.allData.push({
+      name: this.bussionServers[0].name,
+      image: 'https://static.vecteezy.com/system/resources/previews/014/705/802/non_2x/unique-server-icon-free-vector.jpg',
+      children: [
+        ...this.bussionServers[0].children.map((child: any) => ({
+          name: child.name,
+          children: child.children,
+          image: child.image,
+          collapsed: true,
+        }))
+      ]
+    });
+
+
+    console.log(this.allData);
+    this.create();
+
+  }
+
   ngOnInit() {
     this.GetBussionServers();
   }
 
-  editDatas() {
-    this.bussionServers.forEach((s) => {
-      s.id = '1';
-      s.img =
-        'https://static.vecteezy.com/system/resources/previews/014/705/802/non_2x/unique-server-icon-free-vector.jpg'; //'https://static.vecteezy.com/system/resources/previews/010/754/395/non_2x/server-icon-logo-template-free-vector.jpg';
+  create() {
+    var root = am5.Root.new(this.content.nativeElement);
+    root._logo?.dispose();
+    root.setThemes([am5themes_Animated.new(root)]);
+
+    var container = root.container.children.push(
+      am5.Container.new(root, {
+        width: am5.percent(100),
+        height: am5.percent(100),
+        layout: root.verticalLayout
+      })
+    );
+
+    var series = container.children.push(
+      am5hierarchy.Tree.new(root, {
+        singleBranchOnly: true,
+        downDepth: 1,
+        initialDepth: 5,
+        topDepth: 0,
+        //valueField: "value",
+        categoryField: "name",
+        childDataField: "children",
+        disabledField: "collapsed",
+        orientation: "vertical",
+        tooltip: am5.Tooltip.new(root, {
+          labelText: '{category}'
+        }),
+      })
+    );
+
+    series.labels.template.setAll({
+      fill: am5.color(0x000000),
+      y: 30,
+      oversizedBehavior: "none",
+      fontSize: 12,
     });
 
-    this.bussionConnectors.forEach((c) => {
-      c.id = c.nodeId;
-      c.pid = '1';
-      c.img = 'http://demo.bussion.com/assets/images/icons/node7000.jpeg';
-    });
+    series.circles.template.set("forceHidden", true);
 
-    this.bussionDataNodes.forEach((b) => {
-      b.pid = '1';
-      b.id = b.nodeId.toString();
-      b.img = 'http://demo.bussion.com/assets/images/icons/node.jpeg';
-    });
-
-    this.connectorTasks.forEach((t) => {
-      t.pid = t.bussionConnector;
-      t.id = t.connectorId;
-      t.img =
-        'http://demo.bussion.com/BussionImages/Pictures/BussionConnector.png';
-    });
-
-    this.connectorTaskSources.forEach((b, i) => {
-      b.id = b.sourceDatabase + i;
-      b.name = b.sourceDatabase;
-      b.img = 'https://e7.pngegg.com/pngimages/688/143/png-clipart-location-map-map-pin-logo.png';
-    });
-
-    this.connectorTaskDestination.forEach((b, i) => {
-      b.id = b.collection + i;
-      b.name = b.collection;
-      b.img = 'https://e7.pngegg.com/pngimages/626/221/png-clipart-computer-icons-destination-map-miscellaneous-map.png';
-    });
-
-    this.dataStores.map(n => {
-      n.id = n.dataStoreId;
-      n.pid = n.nodeId;
-      n.img = 'http://demo.bussion.com/assets/images/icons/data_store.svg';
-    });
-
-    this.dataFlows.map(n => {
-      n.id = n.flowId;
-      n.pid = '1';
-      n.img = 'https://demo.bussion.com/assets/images/icons/flow.svg';
-    });
-
-    this.collections.forEach((c, i) => {
-      c.id = c.name;
-    })
-
-    this.allData = [...this.bussionServers,
-    ...this.bussionConnectors,
-    ...this.connectorTasks,
-    ...this.connectorTaskSources,
-    ...this.connectorTaskDestination,
-    ...this.bussionDataNodes,
-    ...this.dataStores,
-    //...this.collections,
-    ...this.dataFlows
-    ];
-
-    this.createOrgTree();
-  }
-
-  createOrgTree() {
-
-    const tree = this.content.nativeElement;
-
-    if (tree) {
-      var chart = new OrgChart(tree, {
-        //layout: OrgChart.layout.normal,
-        template: 'ula',
-        enableSearch: false,
-        editForm: {
-          readOnly: true,
-        },
-        //levelSeparation: 120,
-        menu: {
-          svg: { text: 'Export SVG' },
-          csv: { text: 'Export CSV' },
-          /*export_pdf: {
-            text: 'Export PDF',
-            icon: OrgChart.icon.pdf(24, 24, '#7A7A7A'),
-            onClick: () => {
-              chart.exportPDF({
-                format: 'A4',
-                padding: 500,
-                openInNewTab: true,
-                header: 'Header HH'
-              });
-            },
-          },*/
-        },
-        nodeCircleMenu: {
-          editNode: {
-            text: 'Edit node',
-            color: 'white',
-          },
-          addClink: {
-            icon: OrgChart.icon.link(24, 24, '#aeaeae'),
-            text: 'Add C link',
-            color: '#fff',
-            draggable: true,
-          },
-        },
-        padding: 20,
-        toolbar: {
-          zoom: true,
-          fit: true,
-          fullScreen: true,
-          layout: false,
-        },
-        nodeMenu: {
-          details: { text: 'Details' },
-          //add: { text: 'Add' },
-          remove: { text: 'Remove' },
-        },
-        nodeBinding: {
-          field_0: 'name',
-          img_0: 'img',
-        },
+    series.nodes.template.setup = function (target) {
+      target.events.on("dataitemchanged", function (ev) {
+        let obj: any = ev.target.dataItem?.dataContext;
+        let image = obj.image;
+        var icon = target.children.push(am5.Picture.new(root, {
+          width: 40,
+          height: 40,
+          centerX: am5.percent(50),
+          centerY: am5.percent(50),
+          src: image,
+        }));
       });
-
-      chart.config.enableDragDrop = false;
-      chart.load(this.allData);
     }
+
+
+    series.data.setAll(this.allData);
+    series.set("selectedDataItem", series.dataItems[0]);
   }
 }
