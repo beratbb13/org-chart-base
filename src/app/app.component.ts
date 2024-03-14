@@ -150,12 +150,25 @@ export class AppComponent {
       conn.children = children;
     });
 
-    this.bussionDataNodes.map(dN => {
-      let nodeId = dN.nodeId.toString();
-      dN.children = this.dataStores
-        .filter(dS => dS.nodeId == nodeId)
-        .map(dS => ({ name: dS.name, image: 'assets/dataStore.png' }));
-    })
+    let groupedDataStores: { [key: string]: any[] } = {};
+
+    this.dataStores.forEach(dataStore => {
+      const nodeId = dataStore.nodeId.toString();
+
+      if (!groupedDataStores[nodeId]) {
+        groupedDataStores[nodeId] = [];
+      }
+
+      groupedDataStores[nodeId].push({
+        name: dataStore.name,
+        img: 'assets/dataStore.png',
+      });
+    });
+
+    this.bussionDataNodes.forEach(bussionDataNode => {
+      const nodeId = bussionDataNode.nodeId.toString();
+      bussionDataNode.children = groupedDataStores[nodeId] || [];
+    });
 
     let groupedNodes: { [key: string]: any[] } = {};
 
@@ -170,8 +183,7 @@ export class AppComponent {
       groupedNodes[nodeType].push({
         name: node.name,
         children: node.children || [],
-
-        image: 'http://demo.bussion.com/assets/images/icons/node.jpeg',
+        image: 'assets/DataStore.png',
         collapsed: true
       });
     });
@@ -181,13 +193,13 @@ export class AppComponent {
         ...this.bussionConnectors.map(conn => ({
           name: conn.name,
           children: conn.children || [],
-          image: 'http://demo.bussion.com/assets/images/icons/node7000.jpeg',
+          image: 'assets/BussionConnector.png',
           collapsed: true
         })),
         ...Object.keys(groupedNodes).map(key => ({
           name: key,
           children: groupedNodes[key],
-          image: 'http://demo.bussion.com/assets/images/icons/node.jpeg'
+          image: 'assets/dataNode.png'
         })),
 
         /*...this.bussionDataNodes.map(dN => ({
@@ -222,8 +234,8 @@ export class AppComponent {
       ]
     });
 
-
     console.log(this.allData);
+
     this.create();
 
   }
@@ -237,30 +249,26 @@ export class AppComponent {
     root._logo?.dispose();
     root.setThemes([am5themes_Animated.new(root)]);
 
-    var container = root.container.children.push(
-      am5.Container.new(root, {
-        width: am5.percent(100),
-        height: am5.percent(100),
-        layout: root.verticalLayout
-      })
-    );
+    var container = am5.Container.new(root, {
+      width: am5.percent(100),
+      height: am5.percent(100),
+      layout: root.verticalLayout
+    });
 
-    var series = container.children.push(
-      am5hierarchy.Tree.new(root, {
-        singleBranchOnly: true,
-        downDepth: 1,
-        initialDepth: 5,
-        topDepth: 0,
-        //valueField: "value",
-        categoryField: "name",
-        childDataField: "children",
-        disabledField: "collapsed",
-        orientation: "vertical",
-        tooltip: am5.Tooltip.new(root, {
-          labelText: '{category}'
-        }),
-      })
-    );
+    var series = am5hierarchy.Tree.new(root, {
+      singleBranchOnly: true,
+      downDepth: 1,
+      initialDepth: 5,
+      topDepth: 0,
+      //valueField: "value",
+      categoryField: "name",
+      childDataField: "children",
+      disabledField: "collapsed",
+      orientation: "vertical",
+      tooltip: am5.Tooltip.new(root, {
+        labelText: '{category}'
+      }),
+    });
 
     series.labels.template.setAll({
       fill: am5.color(0x000000),
@@ -275,18 +283,22 @@ export class AppComponent {
       target.events.on("dataitemchanged", function (ev) {
         let obj: any = ev.target.dataItem?.dataContext;
         let image = obj.image;
-        var icon = target.children.push(am5.Picture.new(root, {
+        var icon = am5.Picture.new(root, {
           width: 40,
           height: 40,
           centerX: am5.percent(50),
           centerY: am5.percent(50),
           src: image,
-        }));
+        });
+        target.children.push(icon);
       });
     }
 
+    container.children.push(series);
+    root.container.children.push(container);
 
     series.data.setAll(this.allData);
     series.set("selectedDataItem", series.dataItems[0]);
   }
+
 }
